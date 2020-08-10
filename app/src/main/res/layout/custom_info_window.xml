@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="10dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/title"
+            android:layout_gravity="center_horizontal"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:textColor="#000"
+            android:textSize="14sp"
+            android:text="Title"
+            android:textStyle="bold"
+            android:background="@color/cardview_light_background"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:ellipsize="end"
+            android:maxLines="10"
+            android:textSize="14sp"
+            android:textColor="#000"
+            android:text="Snippet"
+            android:id="@+id/snippet"
+            android:background="@color/cardview_light_background"/>
+
+
+        <TextView
+            android:id="@+id/numChannels"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="14sp"
+            android:textColor="#000"
+            android:background="@color/cardview_light_background"
+            android:text="Number of Channels" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_gravity="center"
+            android:layout_below="@+id/google_map">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_toLeftOf="@+id/progressBar"
+                android:ellipsize="end"
+                android:maxLines="10"
+                android:textSize="14sp"
+                android:textColor="#000"
+                android:text="1234"
+                android:id="@+id/lowFreq"
+                android:background="@color/cardview_light_background" />
+
+            <ProgressBar
+                android:id="@+id/progressBar"
+                style="?android:attr/progressBarStyleHorizontal"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:layout_toRightOf="@+id/lowFreq"
+                android:background="@color/cardview_light_background" />
+
+            <TextView
+                android:id="@+id/highFreq"
+                android:layout_width="wrap_content"
+                android:layout_toRightOf="@+id/progressBar"
+                android:layout_height="wrap_content"
+                android:background="@color/cardview_light_background"
+                android:ellipsize="end"
+                android:maxLines="10"
+                android:text="4321"
+                android:textColor="#000"
+                android:textSize="14sp" />
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+</LinearLayout>
