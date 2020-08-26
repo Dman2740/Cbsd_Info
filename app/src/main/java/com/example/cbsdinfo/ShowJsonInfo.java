@@ -3,7 +3,18 @@ package com.example.cbsdinfo;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.os.AsyncTask;
+import android.util.Log;
 import android.widget.Toast;
+
+import androidx.annotation.NonNull;
+
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.Query;
+import com.google.firebase.database.ValueEventListener;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -17,17 +28,22 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.HashMap;
 
-public class ShowJsonInfo extends AsyncTask<String,Void,String>
+public class ShowJsonInfo extends AsyncTask<String, String, HashMap<String, Object>>
 {
+    HashMap<String,Object> map=new HashMap<>();
+
+    DatabaseReference reference;
     String totalParse="";
     private Context context;
     DatabaseHelper databaseHelper;
     private ProgressDialog p;
     Boolean isUpdated=false;
 
-    public ShowJsonInfo(Context context, DatabaseHelper db)
+    public ShowJsonInfo(Context context, DatabaseHelper db,DatabaseReference ref)
     {
+        this.reference=ref;
         this.context=context;
         this.databaseHelper=db;
         this.p=new ProgressDialog(context);
@@ -43,7 +59,7 @@ public class ShowJsonInfo extends AsyncTask<String,Void,String>
         p.show();
     }
     @Override
-    protected String doInBackground(String... params)
+    protected HashMap<String, Object> doInBackground(String... params)
     {
         try
         {
@@ -91,25 +107,35 @@ public class ShowJsonInfo extends AsyncTask<String,Void,String>
                             "High Frequency:"+operationFreqRangeValues.getString("highFrequency")+"\n"+
                             "Max Eirp:" + grantValues.getDouble("maxEirp") + "\n" +
                             "Grant Timestamp:" + grantValues.getString("grantedTimestamp")+"\n"+"\n";
-                    if(databaseHelper.noDuplicate(id))
-                    {
-                        boolean isInserted =
-                                databaseHelper.insertData(
-                                registrationValues.getString("cbsdId"),
-                                locationInfoValues.getString("countyName"),
-                                grantValues.getString("operationState"),
-                                installationParamValues.getDouble("latitude"),
-                                installationParamValues.getDouble("longitude"),
-                                grantValues.getString("grantId"),
-                                operationFreqRangeValues.getString("lowFrequency"),
-                                operationFreqRangeValues.getString("highFrequency"),
-                                grantValues.getDouble("maxEirp"),
-                                grantValues.getString("grantedTimestamp"));
-                        if (isInserted)
-                        {
-                            isUpdated=true;
+                    map.put("ID",registrationValues.getString("cbsdId"));
+                    map.put("Site",locationInfoValues.getString("countyName"));
+                    map.put("Operation State",grantValues.getString("operationState"));
+                    map.put("Latitude",installationParamValues.getDouble("latitude"));
+                    map.put("Longitude",installationParamValues.getDouble("longitude"));
+                    map.put("Grant ID",grantValues.getString("grantId"));
+                    map.put("Low Frequency",operationFreqRangeValues.getString("lowFrequency"));
+                    map.put("High Frequency",operationFreqRangeValues.getString("highFrequency"));
+                    map.put("Max Eirp",grantValues.getDouble("maxEirp"));
+                    map.put("Grant Timestamp", grantValues.getString("grantedTimestamp"));
+                    Query query=reference.child("CBSD Info").orderByChild("ID");
+                    query.addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(@NonNull DataSnapshot snapshot) {
+                            if(snapshot.exists())
+                            {
+                                //Data exists
+                                isUpdated=true;
+                            }
+                            else
+                            {
+                                isUpdated=false;
+                            }
                         }
-                    }
+
+                        @Override
+                        public void onCancelled(@NonNull DatabaseError error) {}
+                    });
+                    reference.child("CBSD Info").child(registrationValues.getString("cbsdId")).setValue(map);
                 }
                 else if(flag.equals("NONE"))
                 {
@@ -123,29 +149,40 @@ public class ShowJsonInfo extends AsyncTask<String,Void,String>
                             "High Frequency:" + 0 + "\n"+
                             "Max Eirp:" + grantValues.optDouble("maxEirp") + "\n" +
                             "Grant Timestamp:" + grantValues.optString("grantedTimestamp") + "\n" + "\n";
-                    if(databaseHelper.noDuplicate(id))
-                    {
-                        boolean isInserted =
-                                databaseHelper.insertData(
-                                registrationValues.getString("cbsdId"),
-                                locationInfoValues.getString("countyName"),
-                                grantValues.getString("operationState"),
-                                installationParamValues.getDouble("latitude"),
-                                installationParamValues.getDouble("longitude"),
-                                "",
-                                "0",
-                                "0",
-                                0.0,
-                                "");
-                        if (isInserted)
-                        {
-                            isUpdated=true;
+                    map.put("ID",registrationValues.getString("cbsdId"));
+                    map.put("Site",locationInfoValues.getString("countyName"));
+                    map.put("Operation State",grantValues.getString("operationState"));
+                    map.put("Latitude",installationParamValues.getDouble("latitude"));
+                    map.put("Longitude",installationParamValues.getDouble("longitude"));
+                    map.put("Grant ID","");
+                    map.put("Low Frequency","0");
+                    map.put("High Frequency","0");
+                    map.put("Max Eirp","0");
+                    map.put("Grant Timestamp","");
+
+                    Query query=reference.child("CBSD Info").orderByChild("ID");
+                    query.addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(@NonNull DataSnapshot snapshot) {
+                            if(snapshot.exists())
+                            {
+                                isUpdated=true;
+                            }
+                            else
+                            {
+                                isUpdated=false;
+                            }
                         }
-                    }
+
+                        @Override
+                        public void onCancelled(@NonNull DatabaseError error) {}
+                    });
+
+                    reference.child("CBSD Info").child(registrationValues.getString("cbsdId")).setValue(map);
                 }
                 totalParse=totalParse+singleParse;
             }
-            return totalParse;
+            return map;
         }
         catch (MalformedURLException e)
         {
@@ -167,14 +204,15 @@ public class ShowJsonInfo extends AsyncTask<String,Void,String>
     }
 
     @Override
-    public void onPostExecute(String response)
+    public void onPostExecute(HashMap<String, Object> response)//String response
     {
         if (response != null)
         {
             super.onPostExecute(response);
             p.dismiss();
             MainActivity.data.setText(this.totalParse);
-            if(isUpdated==false) {
+            if(isUpdated==false)
+            {
                 Toast.makeText(context, "No Updated Information", Toast.LENGTH_LONG).show();
             }
             else
@@ -183,4 +221,5 @@ public class ShowJsonInfo extends AsyncTask<String,Void,String>
             }
         }
     }
+
 }

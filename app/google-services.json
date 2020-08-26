@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "316482692574",
+    "firebase_url": "https://telecomm-6b2ee.firebaseio.com",
+    "project_id": "telecomm-6b2ee",
+    "storage_bucket": "telecomm-6b2ee.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:316482692574:android:5723e5479969be78c2a94f",
+        "android_client_info": {
+          "package_name": "com.example.cbsdinfo"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "316482692574-inuqbsm3ge7dr1khnbh490f2lbf3sd0s.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.cbsdinfo",
+            "certificate_hash": "0ddc8829165f252c5ccc3020c8cfaaded34d5de1"
+          }
+        },
+        {
+          "client_id": "316482692574-eqohm7n873q2m3ta69arogk0gbb3nb87.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAd-XYkh5DLZwsSRNNf6e7Yx2T6SxW8Q7M"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "316482692574-eqohm7n873q2m3ta69arogk0gbb3nb87.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
