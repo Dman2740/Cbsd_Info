@@ -21,7 +21,7 @@
             android:name="com.google.android.geo.API_KEY"
             android:value="AIzaSyCnL2v2z9Dwnq_1GIsOkmQ_0uapWh7bDCY"/>
         <activity
-            android:name=".MainActivity"
+            android:name=".LoginScreen"
             android:label="@string/app_name"
             android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
@@ -30,8 +30,7 @@
             </intent-filter>
         </activity>
         <activity android:name=".ShowMapActivity"></activity>
-        <activity android:name=".RegisterScreen"></activity>
-        <activity android:name=".LoginScreen"></activity>
+        <activity android:name=".MainActivity"></activity>
     </application>
 
 </manifest>

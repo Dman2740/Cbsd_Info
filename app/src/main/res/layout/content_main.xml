@@ -5,35 +5,38 @@
     android:layout_height="match_parent"
     tools:context=".MainActivity">
 
-        <Button
-            android:id="@+id/btnInfo"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="10dp"
-            android:text="Get Registration Info"
-            tools:ignore="HardcodedText" />
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true">
+
+    <Button
+        android:id="@+id/btnInfo"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_marginBottom="10dp"
+        android:text="Update Database"
+        tools:ignore="HardcodedText" />
 
     <Button
         android:id="@+id/buttonOpenMap"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_toRightOf="@+id/btnInfo"
-        android:text="Map"
-        android:layout_toEndOf="@+id/btnInfo"
+        android:layout_marginBottom="10dp"
+        android:text="Refresh Map"
+        android:layout_alignParentRight="true"
         tools:ignore="HardcodedText" />
 
-    <ScrollView
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_below="@+id/btnInfo">
-        <TextView
-            android:id="@+id/textView"
+        <fragment
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:padding="10dp"
-            android:text="Current Radio Information"
-            tools:ignore="HardcodedText" />
-    </ScrollView>
+            android:layout_height="match_parent"
+            android:layout_below="@id/btnInfo"
+            android:id="@+id/google_map"
+            android:name="com.google.android.gms.maps.SupportMapFragment"/>
+
+    </RelativeLayout>
+
 
 
 

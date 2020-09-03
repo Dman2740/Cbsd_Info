@@ -47,12 +47,6 @@
             android:layout_height="wrap_content"
             android:text="LOGIN" />
 
-        <Button
-            android:id="@+id/buttonCreateNewUser"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Create New User" />
-
     </LinearLayout>
 
 </LinearLayout>

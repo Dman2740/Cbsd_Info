@@ -3,13 +3,10 @@ package com.example.cbsdinfo;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.os.AsyncTask;
-import android.util.Log;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -35,24 +32,24 @@ public class ShowJsonInfo extends AsyncTask<String, String, HashMap<String, Obje
     HashMap<String,Object> map=new HashMap<>();
 
     DatabaseReference reference;
-    String totalParse="";
+    String authy="";
     private Context context;
-    DatabaseHelper databaseHelper;
     private ProgressDialog p;
     Boolean isUpdated=false;
+    Boolean checkCredential=false;
 
-    public ShowJsonInfo(Context context, DatabaseHelper db,DatabaseReference ref)
+    public ShowJsonInfo(Context context,DatabaseReference ref,String auth)
     {
         this.reference=ref;
         this.context=context;
-        this.databaseHelper=db;
+        this.authy=auth;
         this.p=new ProgressDialog(context);
     }
     @Override
     protected void onPreExecute()
     {
         super.onPreExecute();
-        p.setMessage("Pulling Data From Federated");
+        p.setMessage("Extracting Data From Federated");
         p.setIndeterminate(false);
         p.setProgressStyle(ProgressDialog.STYLE_SPINNER);
         p.setCancelable(false);
@@ -64,11 +61,17 @@ public class ShowJsonInfo extends AsyncTask<String, String, HashMap<String, Obje
         try
         {
             String data="";
-            String singleParse="";
             URL url = new URL("https://spectrum-connect.federatedwireless.com:9998/v1.1/registration/cbsd?owner=&fccId=");
             HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
             urlConnection.setRequestMethod("GET");
-            urlConnection.setRequestProperty("Authorization", "Basic ZGFyaW9heWFsYTk4QGdtYWlsLmNvbTpDb2xvbWJpQDM2NQ==");
+            urlConnection.setRequestProperty("Authorization", authy);
+            int response=urlConnection.getResponseCode();
+            if(response==HttpURLConnection.HTTP_OK)
+            {
+                checkCredential=true;
+            }
+            //ZGFyaW9heWFsYTk4QGdtYWlsLmNvbTpDb2xvbWJpQDM2NQ== this is mine
+            //bWFydGluYWFib2plbnNlbkBnbWFpbC5jb206Sm9obldheW5lIzIx this is martins
             InputStream in = new BufferedInputStream(urlConnection.getInputStream());
             BufferedReader bin = new BufferedReader(new InputStreamReader(in));
             String inputLine = "";
@@ -88,7 +91,6 @@ public class ShowJsonInfo extends AsyncTask<String, String, HashMap<String, Obje
             {
                 JSONObject jo = ja.getJSONObject(i);
                 JSONObject registrationValues = jo.getJSONObject("registration");
-                String id=registrationValues.getString("cbsdId");
                 JSONObject installationParamValues = registrationValues.getJSONObject("installationParam");
                 JSONObject locationInfoValues = registrationValues.getJSONObject("locationInfo");
                 JSONArray grantArray = jo.getJSONArray("grants");
@@ -97,16 +99,6 @@ public class ShowJsonInfo extends AsyncTask<String, String, HashMap<String, Obje
                 if(flag.equals("AUTHORIZED"))
                 {
                     JSONObject operationFreqRangeValues = grantValues.getJSONObject("operationFrequencyRange");
-                    singleParse = "ID:" + registrationValues.getString("cbsdId") + "\n" +
-                            "Site:" + locationInfoValues.getString("countyName") + "\n" +
-                            "Operation State:" + grantValues.getString("operationState") + "\n"+
-                            "Latitude:" + installationParamValues.getDouble("latitude") + "\n" +
-                            "Longitude:" + installationParamValues.getDouble("longitude") + "\n" +
-                            "Grant ID:" + grantValues.getString("grantId") + "\n" +
-                            "Low Frequency:"+operationFreqRangeValues.getString("lowFrequency")+"\n"+
-                            "High Frequency:"+operationFreqRangeValues.getString("highFrequency")+"\n"+
-                            "Max Eirp:" + grantValues.getDouble("maxEirp") + "\n" +
-                            "Grant Timestamp:" + grantValues.getString("grantedTimestamp")+"\n"+"\n";
                     map.put("ID",registrationValues.getString("cbsdId"));
                     map.put("Site",locationInfoValues.getString("countyName"));
                     map.put("Operation State",grantValues.getString("operationState"));
@@ -117,7 +109,7 @@ public class ShowJsonInfo extends AsyncTask<String, String, HashMap<String, Obje
                     map.put("High Frequency",operationFreqRangeValues.getString("highFrequency"));
                     map.put("Max Eirp",grantValues.getDouble("maxEirp"));
                     map.put("Grant Timestamp", grantValues.getString("grantedTimestamp"));
-                    Query query=reference.child("CBSD Info").orderByChild("ID");
+                    Query query=reference.child(registrationValues.getString("userId")).child("CBSD Info").orderByChild("ID");
                     query.addListenerForSingleValueEvent(new ValueEventListener() {
                         @Override
                         public void onDataChange(@NonNull DataSnapshot snapshot) {
@@ -135,20 +127,10 @@ public class ShowJsonInfo extends AsyncTask<String, String, HashMap<String, Obje
                         @Override
                         public void onCancelled(@NonNull DatabaseError error) {}
                     });
-                    reference.child("CBSD Info").child(registrationValues.getString("cbsdId")).setValue(map);
+                    reference.child(registrationValues.getString("userId")).child("CBSD Info").child(registrationValues.getString("cbsdId")).setValue(map);
                 }
                 else if(flag.equals("NONE"))
                 {
-                    singleParse ="ID:" + registrationValues.getString("cbsdId") + "\n" +
-                            "Site:" + locationInfoValues.getString("countyName") + "\n" +
-                            "Operation State:" + grantValues.getString("operationState") + "\n" +
-                            "Latitude:" + installationParamValues.getDouble("latitude") + "\n" +
-                            "Longitude:" + installationParamValues.getDouble("longitude") + "\n" +
-                            "Grant ID:" + grantValues.optString("grantId") + "\n" +
-                            "Low Frequency:" + 0 + "\n" +
-                            "High Frequency:" + 0 + "\n"+
-                            "Max Eirp:" + grantValues.optDouble("maxEirp") + "\n" +
-                            "Grant Timestamp:" + grantValues.optString("grantedTimestamp") + "\n" + "\n";
                     map.put("ID",registrationValues.getString("cbsdId"));
                     map.put("Site",locationInfoValues.getString("countyName"));
                     map.put("Operation State",grantValues.getString("operationState"));
@@ -159,8 +141,7 @@ public class ShowJsonInfo extends AsyncTask<String, String, HashMap<String, Obje
                     map.put("High Frequency","0");
                     map.put("Max Eirp","0");
                     map.put("Grant Timestamp","");
-
-                    Query query=reference.child("CBSD Info").orderByChild("ID");
+                    Query query=reference.child(registrationValues.getString("userId")).child("CBSD Info").orderByChild("ID");
                     query.addListenerForSingleValueEvent(new ValueEventListener() {
                         @Override
                         public void onDataChange(@NonNull DataSnapshot snapshot) {
@@ -177,10 +158,8 @@ public class ShowJsonInfo extends AsyncTask<String, String, HashMap<String, Obje
                         @Override
                         public void onCancelled(@NonNull DatabaseError error) {}
                     });
-
-                    reference.child("CBSD Info").child(registrationValues.getString("cbsdId")).setValue(map);
+                    reference.child(registrationValues.getString("userId")).child("CBSD Info").child(registrationValues.getString("cbsdId")).setValue(map);
                 }
-                totalParse=totalParse+singleParse;
             }
             return map;
         }
@@ -210,7 +189,6 @@ public class ShowJsonInfo extends AsyncTask<String, String, HashMap<String, Obje
         {
             super.onPostExecute(response);
             p.dismiss();
-            MainActivity.data.setText(this.totalParse);
             if(isUpdated==false)
             {
                 Toast.makeText(context, "No Updated Information", Toast.LENGTH_LONG).show();
