@@ -1,11 +1,18 @@
 package com.example.cbsdinfo;
 
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.Intent;
 import android.os.AsyncTask;
+import android.os.Build;
+import android.provider.ContactsContract;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.core.app.NotificationCompat;
+import androidx.core.app.NotificationManagerCompat;
 
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -33,23 +40,26 @@ public class ShowJsonInfo extends AsyncTask<String, String, HashMap<String, Obje
 
     DatabaseReference reference;
     String authy="";
+    String email="";
+    String userId="";
     private Context context;
     private ProgressDialog p;
-    Boolean isUpdated=false;
     Boolean checkCredential=false;
 
-    public ShowJsonInfo(Context context,DatabaseReference ref,String auth)
+    public ShowJsonInfo(Context context,DatabaseReference ref,String auth,String email,String userId)
     {
+        this.email=email;
         this.reference=ref;
         this.context=context;
         this.authy=auth;
+        this.userId=userId;
         this.p=new ProgressDialog(context);
     }
     @Override
     protected void onPreExecute()
     {
         super.onPreExecute();
-        p.setMessage("Extracting Data From Federated");
+        p.setMessage("Sending Data to Database");
         p.setIndeterminate(false);
         p.setProgressStyle(ProgressDialog.STYLE_SPINNER);
         p.setCancelable(false);
@@ -109,24 +119,6 @@ public class ShowJsonInfo extends AsyncTask<String, String, HashMap<String, Obje
                     map.put("High Frequency",operationFreqRangeValues.getString("highFrequency"));
                     map.put("Max Eirp",grantValues.getDouble("maxEirp"));
                     map.put("Grant Timestamp", grantValues.getString("grantedTimestamp"));
-                    Query query=reference.child(registrationValues.getString("userId")).child("CBSD Info").orderByChild("ID");
-                    query.addListenerForSingleValueEvent(new ValueEventListener() {
-                        @Override
-                        public void onDataChange(@NonNull DataSnapshot snapshot) {
-                            if(snapshot.exists())
-                            {
-                                //Data exists
-                                isUpdated=true;
-                            }
-                            else
-                            {
-                                isUpdated=false;
-                            }
-                        }
-
-                        @Override
-                        public void onCancelled(@NonNull DatabaseError error) {}
-                    });
                     reference.child(registrationValues.getString("userId")).child("CBSD Info").child(registrationValues.getString("cbsdId")).setValue(map);
                 }
                 else if(flag.equals("NONE"))
@@ -141,23 +133,6 @@ public class ShowJsonInfo extends AsyncTask<String, String, HashMap<String, Obje
                     map.put("High Frequency","0");
                     map.put("Max Eirp","0");
                     map.put("Grant Timestamp","");
-                    Query query=reference.child(registrationValues.getString("userId")).child("CBSD Info").orderByChild("ID");
-                    query.addListenerForSingleValueEvent(new ValueEventListener() {
-                        @Override
-                        public void onDataChange(@NonNull DataSnapshot snapshot) {
-                            if(snapshot.exists())
-                            {
-                                isUpdated=true;
-                            }
-                            else
-                            {
-                                isUpdated=false;
-                            }
-                        }
-
-                        @Override
-                        public void onCancelled(@NonNull DatabaseError error) {}
-                    });
                     reference.child(registrationValues.getString("userId")).child("CBSD Info").child(registrationValues.getString("cbsdId")).setValue(map);
                 }
             }
@@ -189,14 +164,9 @@ public class ShowJsonInfo extends AsyncTask<String, String, HashMap<String, Obje
         {
             super.onPostExecute(response);
             p.dismiss();
-            if(isUpdated==false)
-            {
-                Toast.makeText(context, "No Updated Information", Toast.LENGTH_LONG).show();
-            }
-            else
-            {
-                Toast.makeText(context, "There is Updated Information", Toast.LENGTH_LONG).show();
-            }
+            Intent intent = new Intent(context, MainActivity.class);
+            intent.putExtra("userId",userId);
+            context.startActivity(intent);
         }
     }
 
